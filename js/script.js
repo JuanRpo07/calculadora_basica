@@ -8,12 +8,32 @@ let numero2 = "";
 let operador = null;
 let escribiendoSegundoNumero = false;
 
+// Función auxiliar para formatear con separador de miles (sin toLocaleString)
+function formatearNumero(valor) {
+  if (valor === "" || valor === "Error") return valor;
+
+  const n = Number(valor);
+  if (Number.isNaN(n)) return valor;
+
+  // Lo paso a string sin formato
+  const parts = n.toString().split(".");
+  const parteEntera = parts[0];
+  const parteDecimal = parts[1];
+
+  // Insertar puntos cada 3 dígitos desde la derecha
+  const conPuntos = parteEntera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  // Si hay decimales, separarlos con coma
+  return parteDecimal ? `${conPuntos},${parteDecimal}` : conPuntos;
+}
+
 contenedorTeclas.addEventListener("click", (e) => {
   const tecla = e.target;
 
   // Si lo cliqueado no es un botón, salir
   if (!tecla.classList.contains("btnTecla")) return;
 
+  // De lo contrario obtener el texto del botón (tecla)
   const valor = tecla.textContent;
 
   // 1. Limpiar (CE)
@@ -28,13 +48,13 @@ contenedorTeclas.addEventListener("click", (e) => {
 
   // 2. Si es un número
   if (!isNaN(valor)) {
-    // '0'..'9'
+    // '0' - '9'
     if (!escribiendoSegundoNumero) {
-      numero1 += valor;
-      pantalla.value = numero1;
+      numero1 += valor; // interno sin formato
+      pantalla.value = formatearNumero(numero1); // mostrar con formato
     } else {
-      numero2 += valor;
-      pantalla.value = numero2;
+      numero2 += valor; // interno sin formato
+      pantalla.value = formatearNumero(numero2); // mostrar con formato
     }
     return;
   }
@@ -70,9 +90,10 @@ contenedorTeclas.addEventListener("click", (e) => {
         break;
     }
 
-    pantalla.value = resultado;
+    pantalla.value = formatearNumero(resultado); // mostrar con formato
+
     // Preparar para una nueva operación
-    numero1 = String(resultado);
+    numero1 = resultado === "Error" ? "" : String(resultado);
     numero2 = "";
     operador = null;
     escribiendoSegundoNumero = false;
